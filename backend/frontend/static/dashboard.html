@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMXPertLite Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%; /* Ensure the body takes the full height */
+            margin: 0; /* Remove default margin */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            background-color: white; /* Set body background to white */
+        }
+
+        /* Header styling */
+        .header {
+            background-color: #f8d3d3; /* Pastel pink color for the header */
+            padding: 0; /* Remove default padding */
+            width: 100%; /* Ensure header stretches full width */
+            position: fixed; /* Fix position to the top */
+            top: 0; /* Position at the top */
+            left: 0; /* Align to the left */
+            z-index: 1; /* Ensure header is above other content */
+            height: 80px; /* Increased height for header */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        h1 {
+            margin: 0; /* Remove default margin */
+            line-height: normal; /* Reset line height */
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1; /* Allow the main content to take up the available space */
+            margin-left: 70px; /* Adjust margin for the sidenav width */
+            padding: 80px 20px 20px; /* Padding adjusted to ensure the content starts below the fixed header */
+            background-color: white; /* Set body background to white */
+            border-radius: 8px; /* Optional: add some rounding to the corners */
+            margin-bottom: 0; /* Set margin to 0 for footer alignment */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        /* Styling for content sections */
+        .content-sections {
+            display: flex;
+            justify-content: space-between;
+            width: 100%; /* Ensure sections take full width */
+        }
+
+        .section {
+            width: 45%;
+            text-align: center;
+        }
+
+        /* Vertical navigation bar */
+        .sidenav {
+            height: 100vh;
+            width: 70px;
+            background-color: #009688;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align items to the top */
+            transition: width 0.3s ease;
+            overflow: hidden;
+            z-index: 2; /* Ensure sidenav is above other content */
+        }
+
+        /* Hover effect for navbar expansion */
+        .sidenav:hover {
+            width: 250px;
+        }
+
+        /* Logo section */
+        .logo-section {
+            display: flex;
+            align-items: center; /* Align items vertically */
+            justify-content: center;
+            padding: 10px 0;
+            background-color: white;
+            width: 100%;
+            height: 60px; /* Fixed height for the logo section */
+            margin-top: 0; /* Push logo section to the top */
+            position: absolute; /* Change to absolute positioning */
+            top: 0; /* Align to the top of the screen */
+        }
+
+        .logo {
+            width: 40px;
+            margin-right: 10px; /* Add margin to the right of the logo */
+        }
+
+        .company-name {
+            display: none;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Show company name on hover */
+        .sidenav:hover .company-name {
+            display: block;
+            font-size: 1.5em;
+        }
+
+        /* Nav items styling */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px 15px;
+            transition: background-color 0.3s;
+            color: #333333;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        /* Nav links container styling */
+        .nav-links {
+            margin-top: 70px; /* Adjust this value based on the height of the logo section */
+            flex-grow: 1; /* Allow it to take remaining space */
+        }
+
+        /* Text hidden by default, visible on hover */
+        .nav-text {
+            display: none;
+            transition: 0.3s;
+        }
+
+        .sidenav:hover .nav-text {
+            display: inline-block;
+        }
+
+        /* Hover effect for nav items */
+        .nav-item:hover {
+            background-color: #ddd;
+        }
+
+        /* Logout button style */
+        .logout-section {
+            margin-top: auto; /* Push logout section to the bottom */
+            margin-bottom: 0; /* No margin below */
+        }
+
+        .logout-section .nav-item {
+            background-color: #f44336;
+            color: white;
+            height: 40px; /* Set height equal to footer */
+            display: flex; /* Flex display for alignment */
+            align-items: center; /* Center items vertically */
+        }
+
+        .logout-section .nav-item:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Button 80 styles */
+        .button-80 {
+            background: #fff;
+            backface-visibility: hidden;
+            border-radius: .375rem;
+            border-style: solid;
+            border-width: .125rem;
+            box-sizing: border-box;
+            color: #212121;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Circular, Helvetica, sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
+            line-height: 1.3;
+            padding: .875rem 1.125rem;
+            position: relative;
+            text-align: left;
+            text-decoration: none;
+            transform: translateZ(0) scale(1);
+            transition: transform .2s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .button-80:not(:disabled):hover {
+            transform: scale(1.05);
+        }
+
+        .button-80:not(:disabled):hover:active {
+            transform: scale(1.05) translateY(.125rem);
+        }
+
+        .button-80:focus {
+            outline: 0 solid transparent;
+        }
+
+        .button-80:focus:before {
+            content: "";
+            left: calc(-1 * .375rem);
+            pointer-events: none;
+            position: absolute;
+            top: calc(-1 * .375rem);
+            transition: border-radius;
+            user-select: none;
+        }
+
+        .button-80:focus:not(:focus-visible) {
+            outline: 0 solid transparent;
+        }
+
+        .button-80:focus:not(:focus-visible):before {
+            border-width: 0;
+        }
+
+        .button-80:not(:disabled):active {
+            transform: translateY(.125rem);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Hi Kusuma, Welcome to SCMXPertLite</h1>
+    </div>
+
+    <!-- Sidebar/Vertical Navbar -->
+    <div class="sidenav">
+        <div class="logo-section">
+            <img src="images/logo.png" alt="Company Logo" class="logo">
+            <span class="company-name">Exafluence</span>
+        </div>
+
+        <!-- Nav links -->
+        <div class="nav-links">
+            <a href="#" class="nav-item">
+                <i class="material-icons">dashboard</i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">account_circle</i>
+                <span class="nav-text">My Account</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">local_shipping</i>
+                <span class="nav-text">My Shipment</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">add_box</i>
+                <span class="nav-text">New Shipment</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">storage</i>
+                <span class="nav-text">Device Data</span>
+            </a>
+        </div>
+
+        <!-- Logout button aligned at the bottom -->
+        <div class="logout-section">
+            <a href="#" class="nav-item">
+                <i class="material-icons">logout</i>
+                <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="content-sections">
+            <div class="section">
+                <button class="button-80" onclick="window.location.href='create_shipment.html'">Create Shipment</button>
+            </div>
+            <div class="section">
+                <button class="button-80" onclick="window.location.href='device_data.html'">Device Data Stream</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

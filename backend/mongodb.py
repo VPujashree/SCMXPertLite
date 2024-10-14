@@ -1,131 +1,170 @@
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
+from pydantic import BaseModel, EmailStr
+from typing import List
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
 from pymongo import MongoClient
-from bson.objectid import ObjectId
-from datetime import datetime, timedelta, timezone
 
-# Connection string to MongoDB
-client = MongoClient('mongodb://localhost:27017/')
-db = client['SCMXpertLite']  # Create or connect to the database
+# MongoDB Configuration
+MONGO_DETAILS = "mongodb://localhost:27017"  # Replace with your MongoDB connection string
+client = MongoClient(MONGO_DETAILS)
+database = client['your_database_name']  # Replace with your database name
+users_collection = database['users']  # Your users collection
+shipments_collection = database['shipments']  # Your shipments collection
 
-# Create collections
-users_collection = db['Users']
-shipments_collection = db['Shipments']
-devices_collection = db['Devices']
-sessions_collection = db['Sessions']
-roles_collection = db['Roles']
-shipment_tracking_logs_collection = db['ShipmentTrackingLogs']
-batch_shipments_collection = db['BatchShipments']
+# Initialize FastAPI
+app = FastAPI()
 
-# Function to create a user
-def create_user(username, email, password_hash, role):
-    user = {
-        "username": username,
-        "email": email,
-        "password_hash": password_hash,
-        "role": role,
-        "created_at": datetime.now(timezone.utc)  # Use timezone-aware UTC time
-    }
-    result = users_collection.insert_one(user)
-    return str(result.inserted_id)  # Return the new user's ID
+# Mount the static directory (adjust the path if needed)
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
-# Function to create a device
-def create_device(device_id, shipment_id, location, sensor_data):
-    device = {
-        "device_id": device_id,
-        "shipment_id": ObjectId(shipment_id),  # Reference to the shipment
-        "location": location,  # Expecting {"latitude": Float, "longitude": Float}
-        "sensor_data": sensor_data,  # Expecting {"temperature": Float, "humidity": Float}
-        "timestamp": datetime.now(timezone.utc)  # Use timezone-aware UTC time
-    }
-    result = devices_collection.insert_one(device)
-    return str(result.inserted_id)  # Return the new device's ID
+# Serve index.html from the frontend directory
+@app.get("/")
+def read_root():
+    return FileResponse("frontend/index.html")
 
-# Function to create a shipment
-def create_shipment(shipment_number, route_details, device_id, goods_type, expected_delivery_date):
-    shipment = {
-        "shipment_number": shipment_number,
-        "route_details": route_details,  # Expected to be a dictionary
-        "device": ObjectId(device_id) if device_id else None,  # Convert string ID to ObjectId or set to None
-        "PO_number": "PO987654",
-        "NDC_number": "001234567890",
-        "goods_serial_number": "GSN-0001",
-        "container_number": "CNT12345",
-        "goods_type": goods_type,
-        "expected_delivery_date": expected_delivery_date,
-        "shipment_desc": "Electronic shipment",
-        "created_at": datetime.now(timezone.utc),  # Use timezone-aware UTC time
-        "updated_at": datetime.now(timezone.utc)   # Use timezone-aware UTC time
-    }
-    result = shipments_collection.insert_one(shipment)
-    return str(result.inserted_id)  # Return the new shipment's ID
+# JWT Configuration
+SECRET_KEY = "910e0cf7760ccf7d08a228a06b0cc2f43687e94f5a6e9c0b3a2faeb8bb59f4c8"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Function to create a session
-def create_session(user_id, jwt_token):
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)  # Expires in 1 hour
-    session = {
-        "user_id": ObjectId(user_id),  # Reference to User ID
-        "jwt_token": jwt_token,
-        "expires_at": expires_at
-    }
-    result = sessions_collection.insert_one(session)
-    return str(result.inserted_id)  # Return the new session's ID
+# Security
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Function to create a role
-def create_role(role, permissions):
-    role_doc = {
-        "role": role,
-        "permissions": permissions
-    }
-    result = roles_collection.insert_one(role_doc)
-    return str(result.inserted_id)  # Return the new role's ID
+# User Models
+class User(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str = None
+    disabled: bool = None
+    role: str  # Added role field
+    password: str  # Added password field
 
-# Function to log shipment tracking
-def log_shipment_tracking(shipment_id, status, location):
-    log = {
-        "shipment_id": ObjectId(shipment_id),  # Reference to Shipment ID
-        "status": status,
-        "location": location,  # Expecting {"latitude": Float, "longitude": Float}
-        "timestamp": datetime.now(timezone.utc)  # Use timezone-aware UTC time
-    }
-    result = shipment_tracking_logs_collection.insert_one(log)
-    return str(result.inserted_id)  # Return the new log's ID
+class UserInDB(User):
+    hashed_password: str  # This field is only for the database representation
 
-# Function to create a batch shipment
-def create_batch_shipment(batch_id, shipment_ids):
-    batch = {
-        "batch_id": batch_id,
-        "shipment_ids": [ObjectId(id) for id in shipment_ids],  # Convert string IDs to ObjectIds
-        "created_at": datetime.now(timezone.utc)  # Use timezone-aware UTC time
-    }
-    result = batch_shipments_collection.insert_one(batch)
-    return str(result.inserted_id)  # Return the new batch's ID
+# Shipment Models
+class Shipment(BaseModel):
+    description: str
+    status: str
+    created_at: datetime
 
-# Example Usage
-if __name__ == "__main__":
-    # Create roles
-    admin_role_id = create_role("Admin", ["create", "read", "update", "delete"])
-    user_role_id = create_role("User", ["read"])
+class ShipmentInDB(Shipment):
+    user_id: str  # Associate shipment with user
 
-    # Create a user
-    user_id = create_user("john_doe", "john@example.com", "hashed_password", "User")
-    print(f"User created with ID: {user_id}")
+# Password and JWT Utilities
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
-    # Create a shipment
-    shipment_id = create_shipment("SHIP1234", {"from": "New York", "to": "San Francisco"}, None, "Perishable", datetime(2024, 10, 15))
-    print(f"Shipment created with ID: {shipment_id}")
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
-    # Create a device
-    device_id = create_device("DEV001", shipment_id, {"latitude": 37.7749, "longitude": -122.4194}, {"temperature": 20.5, "humidity": 60})
-    print(f"Device created with ID: {device_id}")
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-    # Create a session
-    jwt_token = "generated_jwt_token_here"
-    session_id = create_session(user_id, jwt_token)
-    print(f"Session created with ID: {session_id}")
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = users_collection.find_one({"username": username})  # Query from MongoDB
+    if user is None:
+        raise credentials_exception
+    return UserInDB(
+        username=user['username'],
+        email=user['email'],
+        full_name=user.get('full_name', None),
+        disabled=user.get('disabled', None),
+        role=user.get('role', None),
+        hashed_password=user['hashed_password']  # Include hashed password for validation
+    )
 
-    # Log shipment tracking
-    tracking_log_id = log_shipment_tracking(shipment_id, "In Transit", {"latitude": 40.7128, "longitude": -74.0060})
-    print(f"Tracking log created with ID: {tracking_log_id}")
+# API Endpoints
+@app.post("/signup", response_model=User)
+async def sign_up(user: User):
+    if users_collection.find_one({"username": user.username}):
+        raise HTTPException(status_code=400, detail="User already registered")
+    
+    hashed_password = get_password_hash(user.password)  # Ensure you hash the password
+    user_dict = user.dict()
+    user_dict['hashed_password'] = hashed_password
+    users_collection.insert_one(user_dict)  # Insert into MongoDB
+    return user
 
-    # Create a batch shipment
-    batch_id = create_batch_shipment("BATCH001", [shipment_id])
-    print(f"Batch shipment created with ID: {batch_id}")
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = users_collection.find_one({"username": form_data.username})  # Fetch from MongoDB
+    if not user or not verify_password(form_data.password, user['hashed_password']):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user['username']}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# Create Shipment Endpoint
+@app.post("/shipments", response_model=ShipmentInDB)
+async def create_shipment(shipment: Shipment, current_user: User = Depends(get_current_user)):
+    shipment_data = ShipmentInDB(
+        description=shipment.description,
+        status=shipment.status,
+        created_at=shipment.created_at,
+        user_id=current_user.username  # Associate shipment with the logged-in user
+    )
+    shipments_collection.insert_one(shipment_data.dict())  # Insert into MongoDB
+    return shipment_data
+
+# Password Reset Endpoint
+@app.post("/reset-password")
+async def reset_password(username: str, email: str):
+    user = users_collection.find_one({"username": username, "email": email})
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_password = "newsecurepassword123"  # This should be securely generated in a real application
+    hashed_password = get_password_hash(new_password)
+
+    # Update the password in the database
+    users_collection.update_one({"_id": user["_id"]}, {"$set": {"hashed_password": hashed_password}})
+    
+    # Placeholder for email sending logic
+    # send_password_email(email, new_password)  # Implement this function to send an email
+
+    return {"msg": "Password reset successful. New password sent to your email."}
+
+# Role-based access control
+def role_required(role: str):
+    def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role != role:
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+        return current_user
+    return role_checker
+
+@app.get("/admin")
+async def admin_route(current_user: User = Depends(role_required("admin"))):
+    return {"msg": "Welcome Admin!"}
+
+@app.get("/users/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+# To run the app, use: uvicorn backend.app:app --reload
