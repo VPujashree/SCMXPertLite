@@ -20,7 +20,7 @@
 
         /* Header styling */
         .header {
-            background-color: #f8d3d3; /* Pastel pink color for the header */
+            background-color: #788D8E; /* Pastel pink color for the header */
             padding: 0; /* Remove default padding */
             width: 100%; /* Ensure header stretches full width */
             position: fixed; /* Fix position to the top */
@@ -40,15 +40,15 @@
 
         /* Main content area */
         .main-content {
-            flex: 1; /* Allow the main content to take up the available space */
-            margin-left: 70px; /* Adjust margin for the sidenav width */
-            padding: 80px 20px 20px; /* Padding adjusted to ensure the content starts below the fixed header */
-            background-color: white; /* Set body background to white */
-            border-radius: 8px; /* Optional: add some rounding to the corners */
-            margin-bottom: 0; /* Set margin to 0 for footer alignment */
-            display: flex; /* Use flexbox for centering */
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
+            flex: 1;
+            margin-left: 70px;
+            padding: 80px 20px 20px;
+            background-image: url('images/bg.jpeg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* Styling for content sections */
@@ -67,7 +67,7 @@
         .sidenav {
             height: 100vh;
             width: 70px;
-            background-color: #009688;
+            background-color:#788D8E;
             position: fixed;
             top: 0;
             left: 0;
@@ -232,13 +232,24 @@
         .button-80:not(:disabled):active {
             transform: translateY(.125rem);
         }
+
+        .profile-pic {
+            width: 50px; /* Set your desired width */
+            height: 50px; /* Set your desired height */
+            border-radius: 50%; /* Make it circular */
+            margin-left: 20px; /* Space between the title and the image */
+            object-fit: cover; /* Ensures the image covers the area */
+        }
+
     </style>
 </head>
 <body>
     <!-- Header -->
     <div class="header">
         <h1>Hi Kusuma, Welcome to SCMXPertLite</h1>
+        <img id="profile-pic" src="images/default_profile.png" alt="Profile Picture" class="profile-pic">
     </div>
+
 
     <!-- Sidebar/Vertical Navbar -->
     <div class="sidenav">
@@ -279,16 +290,32 @@
             </a>
         </div>
     </div>
-    <!-- Main Content Area -->
+
+    <!-- Main content area with background image -->
     <div class="main-content">
         <div class="content-sections">
             <div class="section">
-                <button class="button-80" onclick="window.location.href='create_shipment.html'">Create Shipment</button>
+                <button class="button-80">Create Shipment</button>
             </div>
             <div class="section">
-                <button class="button-80" onclick="window.location.href='device_data.html'">Device Data Stream</button>
+                <button class="button-80">Device Data Stream</button>
             </div>
         </div>
     </div>
+    <script>
+        // Function to load the profile picture from localStorage
+        function loadProfilePicture() {
+            const profilePicElement = document.getElementById('profile-pic');
+            const storedImage = localStorage.getItem('profilePicture');
+    
+            if (storedImage) {
+                profilePicElement.src = storedImage; // Set the src to the stored image
+            }
+        }
+    
+        // Call the function to load the profile picture when the page loads
+        window.onload = loadProfilePicture;
+    </script>
+    
 </body>
 </html>

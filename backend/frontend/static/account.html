@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMXPertLite Account</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+
+        /* Header styling */
+        .header {
+            background-color: #788D8E;
+            padding: 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            height: 80px;
+            display: flex;
+            justify-content: center; /* Center align */
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin: 0;
+            line-height: normal;
+            text-align: center; /* Center align */
+        }
+
+        /* Profile Picture in Header */
+        .header-profile-picture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ccc;
+            cursor: pointer;
+            margin-left: 20px; /* Add margin to bring it a little to the left */
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            margin-left: 70px;
+            padding: 80px 20px 20px;
+            background-image: url('images/bg.jpeg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+}
+
+
+        .account-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            padding: 40px; /* Increased padding */
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .profile-picture {
+            width: 120px; /* Adjusted size */
+            height: 120px; /* Adjusted size */
+            margin-bottom: 30px; /* Adjusted margin */
+            cursor: pointer;
+        }
+
+
+        /* Input Field Styles */
+        .input-field {
+            width: calc(100% - 20px); /* Full width minus padding */
+            padding: 10px; /* Add padding on all sides */
+            margin-bottom: 10px; /* Space between fields */
+            box-sizing: border-box; /* Include padding in the element's total width/height */
+        }
+
+        /* Change Password Popup */
+        .popup {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0); /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+            padding-top: 60px; /* Location of the box */
+        }
+
+        /* Popup Content */
+        .popup-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 600px; /* Set a max width for the popup */
+        }
+
+
+        /* Button styling */
+        .button-80 {
+            background: #788D8E;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .button-80:hover {
+            background-color: #4b6768;
+        }
+
+        /* Styling for labels */
+        .label {
+            font-size: 18px;
+            margin: 5px 0;
+            align-self: flex-start;
+        }
+
+        /* Vertical navigation bar */
+        .sidenav {
+            height: 100vh;
+            width: 70px;
+            background-color: #788D8E;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        /* Hover effect for navbar expansion */
+        .sidenav:hover {
+            width: 250px;
+        }
+
+        /* Logo section */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: white;
+            width: 100%;
+            height: 60px;
+            margin-top: 0;
+            position: absolute;
+            top: 0;
+        }
+
+        .logo {
+            width: 40px;
+            margin-right: 10px;
+        }
+
+        .company-name {
+            display: none;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Show company name on hover */
+        .sidenav:hover .company-name {
+            display: block;
+            font-size: 1.5em;
+        }
+
+        /* Nav items styling */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px 15px;
+            transition: background-color 0.3s;
+            color: #333333;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        /* Nav links container styling */
+        .nav-links {
+            margin-top: 70px;
+            flex-grow: 1;
+        }
+
+        /* Text hidden by default, visible on hover */
+        .nav-text {
+            display: none;
+            transition: 0.3s;
+        }
+
+        .sidenav:hover .nav-text {
+            display: inline-block;
+        }
+
+        /* Hover effect for nav items */
+        .nav-item:hover {
+            background-color: #ddd;
+        }
+
+        /* Logout button style */
+        .logout-section {
+            margin-top: auto;
+            margin-bottom: 0;
+        }
+
+        .logout-section .nav-item {
+            background-color: #f44336;
+            color: white;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logout-section .nav-item:hover {
+            background-color: #d32f2f;
+        }
+
+              /* Popup Content */
+        .popup-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 1000px; /* Set a max width for the popup */
+        }
+        
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Hi Kusuma, Welcome to SCMXPertLite</h1>
+        <div class="header-profile-picture" onclick="navigateToAccount()">
+            <img id="header-profile-img" src="images/user.png" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%;">
+        </div>
+    </div>
+
+    <!-- Sidebar/Vertical Navbar -->
+    <div class="sidenav">
+        <div class="logo-section">
+            <img src="images/logo.png" alt="Company Logo" class="logo">
+            <span class="company-name">Exafluence</span>
+        </div>
+
+        <!-- Nav links -->
+        <div class="nav-links">
+            <a href="#" class="nav-item">
+                <i class="material-icons">dashboard</i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="account.html" class="nav-item">
+                <i class="material-icons">account_circle</i>
+                <span class="nav-text">My Account</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">local_shipping</i>
+                <span class="nav-text">My Shipment</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">add_box</i>
+                <span class="nav-text">New Shipment</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="material-icons">storage</i>
+                <span class="nav-text">Device Data</span>
+            </a>
+        </div>
+
+        <!-- Logout section -->
+        <div class="logout-section">
+            <a href="#" class="nav-item">
+                <i class="material-icons">logout</i>
+                <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="main-content">
+        <div class="account-section">
+            <h2>Account Settings</h2>
+            <div class="profile-picture" id="profile-picture" onclick="openPopup()">
+                <img id="profile-img" src="images/user.png" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%;">
+            </div>
+            <label class="label">Full Name</label>
+            <input type="text" class="input-field" value="Kusuma" readonly>
+            <label class="label">Username</label>
+            <input type="text" class="input-field" value="kusuma123" readonly>
+            <label class="label">Email</label>
+            <input type="email" class="input-field" value="kusuma@example.com" id="email">
+            <button class="button-80" onclick="verifyEmail()">Verify Email</button>
+            <label class="label">Phone Number</label>
+            <input type="text" class="input-field" placeholder="Add Phone Number" id="phone-number">
+            <button class="button-80" onclick="verifyPhone()">Verify Phone</button>
+            <button class="button-80" onclick="openChangePasswordPopup()">Change Password</button>
+        </div>        
+    </div>
+
+    <!-- Change Password Popup -->
+    <div id="changePasswordPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeChangePasswordPopup()">&times;</span>
+            <h2>Change Password</h2>
+            <label class="label">Current Password</label>
+            <input type="password" class="input-field" id="current-password">
+            <label class="label">New Password</label>
+            <input type="password" class="input-field" id="new-password">
+            <button class="button-80" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- Profile Picture Popup -->
+    <div id="profilePicturePopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2>Profile Picture Options</h2>
+            <input type="file" id="fileInput" accept="image/*">
+            <button class="button-80" onclick="uploadPhoto()">Upload Photo</button>
+            <button class="button-80" onclick="removePhoto()">Remove Photo</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Function to verify email
+        function verifyEmail() {
+            const email = document.getElementById("email").value;
+            if (email) {
+                // Add your logic to send a verification email
+                alert('Verification email sent to ' + email);
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
+
+        // Function to open Change Password Popup
+        function openChangePasswordPopup() {
+            document.getElementById("changePasswordPopup").style.display = "block";
+        }
+
+        // Function to close Change Password Popup
+        function closeChangePasswordPopup() {
+            document.getElementById("changePasswordPopup").style.display = "none";
+        }
+
+        function changePassword() {
+            const currentPassword = document.getElementById("current-password").value;
+            const newPassword = document.getElementById("new-password").value;
+
+            // Add your logic to validate and change the password
+            if (currentPassword && newPassword) {
+                // Here you would typically send the request to your server
+                alert('Password updated successfully.');
+                closeChangePasswordPopup(); // Close the popup after success
+            } else {
+                alert('Please fill in both fields.');
+            }
+        }
+        // Function to open Profile Picture Popup
+        function openPopup() {
+            document.getElementById("profilePicturePopup").style.display = "block";
+        }
+
+        // Function to close Profile Picture Popup
+        function closePopup() {
+            document.getElementById("profilePicturePopup").style.display = "none";
+        }
+
+        function uploadPhoto() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("profile-img").src = e.target.result; // Update profile picture
+                    alert('Profile picture updated successfully.');
+                    closePopup(); // Close the popup
+                };
+                reader.readAsDataURL(file); // Convert to base64
+            } else {
+                alert('Please select a file to upload.');
+            }
+        }
+
+        function removePhoto() {
+            document.getElementById("profile-img").src = 'images/user.png'; // Reset to default image
+            alert('Profile picture removed.');
+            closePopup(); // Close the popup
+        }
+
+        // Function to navigate to account page
+        function navigateToAccount() {
+            window.location.href = "account.html"; // Navigate to the account page
+        }
+
+        // Function to verify phone number (add your logic here)
+        function verifyPhone() {
+            const phoneNumber = document.querySelector('.input-field[type="text"]').value;
+            if (phoneNumber) {
+                alert('Verification link sent to ' + phoneNumber);
+            } else {
+                alert('Please enter a phone number.');
+            }
+        }
+
+        // Close the popup if the user clicks anywhere outside of it
+        window.onclick = function(event) {
+            const changePasswordPopup = document.getElementById("changePasswordPopup");
+            const profilePicturePopup = document.getElementById("profilePicturePopup");
+            if (event.target == changePasswordPopup) {
+                closeChangePasswordPopup();
+            }
+            if (event.target == profilePicturePopup) {
+                closePopup();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+# code to export the schema and stored in .xls form in downloads folder
 import pandas as pd
 from pymongo import MongoClient
 import os
